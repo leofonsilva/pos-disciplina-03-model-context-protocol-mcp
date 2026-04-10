@@ -1,13 +1,15 @@
+// Monta a mensagem enviada para a IA com os dados do arquivo que será processado
 export const getUserPrompt = ({ intent, fileName, fileContent }: { intent: string, fileName: string, fileContent: string }) =>
-    `
-    Intent: ${intent}
-    File name: ${fileName ?? 'N/A'}
-    File content:
-    ${fileContent}
+`
+Intent: ${intent}
+File name: ${fileName ?? 'N/A'}
+File content:
+${fileContent}
 `
 
+// Define as regras que a IA deve seguir ao processar os dados
 export const getSystemPrompt = () =>
-    `
+`
 You are a data processing agent. You have access to these tools:
 - csv_to_json: converts a CSV string to JSON
 - filesystem tools (read_file, write_file, etc.): read and write files on disk

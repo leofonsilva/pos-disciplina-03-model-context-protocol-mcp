@@ -1,0 +1,18 @@
+Total Revenue Report
+====================
+
+Data Source: sales.csv
+Records Processed: 8
+
+Sales Breakdown:
+----------------
+- shampoo: $10.99 (1 sale)
+- soap: $5.49 (1 sale)
+- toothpaste: $3.99 (1 sale)
+- rice: $22.90 (1 sale)
+- beans: $6.99 (4 sales) = $27.96
+
+Total Revenue: $71.33
+
+Calculation:
+10.99 + 5.49 + 3.99 + 22.90 + 27.96 = 71.33

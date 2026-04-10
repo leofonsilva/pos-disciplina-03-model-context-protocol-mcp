@@ -1,0 +1,23 @@
+SALES REVENUE REPORT
+====================
+
+Data Source: sales.csv
+Date of Analysis: 2024-01-01 (all records from this date)
+Total Records: 8
+
+BREAKDOWN BY PRODUCT:
+---------------------
+1. shampoo    - $10.99 (1 unit)
+2. soap       - $5.49  (1 unit)
+3. toothpaste - $3.99  (1 unit)
+4. rice       - $22.90 (1 unit)
+5. beans      - $6.99  (4 units) = $27.96
+
+TOTAL REVENUE: $71.33
+
+SUMMARY:
+--------
+- Most sold product: beans (4 units)
+- Highest revenue product: rice ($22.90)
+- Total units sold: 8
+- Average price per unit: $8.92

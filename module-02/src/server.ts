@@ -3,39 +3,47 @@ import { buildGraph } from './graph/factory.ts';
 
 import Fastify from 'fastify';
 
+// Cria e configura o servidor Fastify com rota para chat
 export const createServer = async () => {
-    const graph = await buildGraph();
-    const app = Fastify();
+  // Constrói o grafo (inclui nós: intentParser e agent)
+  const graph = await buildGraph();
+  
+  const app = Fastify();
 
-    app.post('/chat', {
-        schema: {
-            body: {
-                type: 'object',
-                required: ['question'],
-                properties: {
-                    question: { type: 'string', minLength: 10 },
-                },
-            }
-        }
-    }, async function (request, reply) {
-        try {
-            const { question } = request.body as {
-                question: string;
-            };
+  // Rota POST para processar perguntas com dados (CSV, JSON, etc.)
+  app.post('/chat', {
+    schema: {
+      body: {
+        type: 'object',
+        required: ['question'],
+        properties: {
+          question: { type: 'string', minLength: 10 },  // Mínimo 10 caracteres
+        },
+      }
+    }
+  }, async function (request, reply) {
+    try {
+      // Extrai a pergunta do corpo da requisição
+      const { question } = request.body as {
+        question: string;
+      };
 
-            const response = await graph.invoke({
-                messages: [new HumanMessage(question)],
-            });
+      // Executa o grafo com a pergunta do usuário
+      // O fluxo será: intentParser → agent → resposta
+      const response = await graph.invoke({
+        messages: [new HumanMessage(question)],
+      });
 
-            return reply.send(response.answer ?? response.messages.at(-1)?.text ?? 'No response generated.');
+      // Retorna a resposta (prioriza answer, fallback para última mensagem)
+      return reply.send(response.answer ?? response.messages.at(-1)?.text ?? 'No response generated.');
 
-        } catch (error) {
-            console.error('❌ Error processing request:', error);
-            return reply.status(500).send({
-                error: 'An error occurred while processing your request.',
-            });
-        }
-    });
+    } catch (error) {
+      console.error('Error processing request:', error);
+      return reply.status(500).send({
+        error: 'An error occurred while processing your request.',
+      });
+    }
+  });
 
-    return app;
+  return app;
 };

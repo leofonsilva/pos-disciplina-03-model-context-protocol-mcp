@@ -3,16 +3,27 @@ import { withLangGraph } from '@langchain/langgraph/zod';
 import type { BaseMessage } from '@langchain/core/messages';
 import { z } from 'zod/v3';
 
-export const GraphAnnotation =  z.object({
-    messages: withLangGraph(
-        z.custom<BaseMessage[]>(),
-        MessagesZodMeta),
-    answer: z.string().optional(),
-    intent: z.string().optional(),
-    fileContent: z.string().optional(),
-    fileName: z.string().optional(),
+// Define a estrutura de estado do grafo de pipeline
+export const GraphAnnotation = z.object({
+  // Histórico de mensagens da conversa
+  messages: withLangGraph(
+    z.custom<BaseMessage[]>(),
+    MessagesZodMeta),
+  
+  // Resposta final gerada pelo agente
+  answer: z.string().optional(),
+  
+  // Intenção identificada (ex: "extract", "summarize", "ask")
+  intent: z.string().optional(),
+  
+  // Conteúdo do arquivo extraído (texto, CSV, JSON, etc.)
+  fileContent: z.string().optional(),
+  
+  // Nome do arquivo sendo processado
+  fileName: z.string().optional(),
 
-    error: z.string().optional(),
+  // Mensagem de erro, se houver
+  error: z.string().optional(),
 });
 
 export type GraphState = z.infer<typeof GraphAnnotation>;

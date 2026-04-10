@@ -1,0 +1,14 @@
+Top 5 Most Sold Products Report
+================================
+
+Data Source: sales_data.csv
+Total Records Analyzed: 8
+
+Ranking:
+1. beans - 4 units sold
+2. shampoo - 1 unit sold
+3. soap - 1 unit sold
+4. toothpaste - 1 unit sold
+5. rice - 1 unit sold
+
+Note: There are only 5 unique products in the dataset, so all products are listed. The product 'beans' is the clear top seller with 4 sales, while all other products have 1 sale each.
