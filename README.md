@@ -68,5 +68,53 @@ O projeto implementa um servidor HTTP Fastify que atua como gateway para um agen
 - Cache de respostas para reduzir chamadas de API
 - Demonstração de como criar agentes autônomos que combinam múltiplas fontes de dados.
 
+### Módulo 03: MCPs vs Tools tradicionais para ambiente de desenvolvimento
+**Projeto:** [Entendendo Agents e Instructions](module-03)
+
+**Tecnologias utilizadas:**
+- **GitHub Copilot** - Assistente de IA para desenvolvimento
+- **Copilot Agents** - Agentes especializados configuráveis
+- **Playwright** - Framework de testes end-to-end
+
+**Conceitos abordados:**
+- Agentes especializados via arquivos de configuração `.agent.md`
+- Integração de ferramentas MCP nos agentes
+- Automação de desenvolvimento com TDD
+- Geração e correção automática de testes
+- Separação de responsabilidades por agente
+
+**Aplicação prática:**
+Este projeto demonstra como configurar agentes do GitHub Copilot para automatizar tarefas de desenvolvimento. Os agentes são definidos em arquivos `.agent.md` na pasta `.github/agents/` e podem ser invocados no VS Code com `@nome-do-agente`.
+- Necessário apenas que a pasta .github/ esteja na raiz do projeto para que funcione corretamente.
+- Sempre que quiser buscar um melhor padrão para alguma tecnologia use o prefixo 'Awesome' + tecnologia no GitHub. Vai encontrar os melhores padrões assim
+- Playwright foi usado de exemplo, mas pode-se fazer o mesmo com qualquer outra ferramenta para extrair o máximo de benefícios dela.
+
+**Agentes configurados (exemplos testados):**
+- `@developer` — Implementa features seguindo TDD, SOLID e imutabilidade
+- `@playwright-test-planner` — Mapeia fluxos da aplicação e gera planos de teste
+- `@playwright-test-generator` — Transforma planos em código Playwright executável
+- `@playwright-test-healer` — Debugga e corrige testes quebrados automaticamente
+
+**Como usar:**
+1. Copie os arquivos `.agent.md` para `.github/agents/` do seu repositório
+2. No VS Code com GitHub Copilot ativado, use `@agent` para chamar um agente
+3. Siga o fluxo: Planner → Generator → (Healer se necessário)
+4. Adapte os agentes conforme sua stack e necessidades
+
+**Personalização:**
+Os agentes são totalmente customizáveis. Edite os arquivos `.agent.md` para ajustar:
+- Descrição e escopo de atuação
+- Ferramentas disponíveis (MCP servers, search, edit, etc.)
+- Princípios e padrões de código
+- Modelo LLM utilizado (ex: Claude Sonnet, GPT-4)
+
+**Exemplo de invocação:**
+```
+@playwright-test-planner Crie plano de teste para checkout
+@playwright-test-generator Gere testes a partir do plano
+@playwright-test-healer Corrija falhas
+@developer Implementa feature de filtros
+```
+
 ## Resumo das Tecnologias
 Pendente...
