@@ -116,5 +116,67 @@ Os agentes são totalmente customizáveis. Edite os arquivos `.agent.md` para aj
 @developer Implementa feature de filtros
 ```
 
+**Projeto:** [Entendendo skills](module-03-a)
+
+**Tecnologias utilizadas:**
+- **GitHub Copilot Skills** - Pacotes modulares para estender agentes
+- **Skills CLI** (`npx skills`) - Gerenciador de pacotes de skills
+- **YAML/JSON** - Formato de configuração de skills
+
+**Conceitos abordados:**
+- Skills como unidades de capacidades reutilizáveis
+- Descoberta e instalação de skills via Skills CLI
+- Ecosistema skills.sh - repositório de skills comunitárias
+- Customização de agentes através de skills compostas
+- Versionamento e lockfile de dependências (skills-lock.json)
+
+**Aplicação prática:**
+Skills são pacotes que adicionam novas capacidades aos agentes do GitHub Copilot. Cada skill define:
+- Nome e descrição (usados pelo agente para auto-diagnose)
+- Gatilhos de ativação (quando a skill deve ser usada)
+- Guias de referência com exemplos práticos
+- Configurações específicas da ferramenta
+
+**Skills instaladas (exemplos testados):**
+- `ffmpeg` — Processamento de vídeo e áudio (conversão, compressão, corte, extração)
+- `find-skills` — Descobre e instala novas skills do ecossistema
+- `neo4j-cypher-guide` — Guia moderno para consultas Cypher no Neo4j
+
+**Como usar:**
+1. Instale skills via CLI: `npx skills add <owner/repo>`
+2. As skills são automaticamente disponibilizadas para os agentes
+3. Os agentes decidem quando usar cada skill baseado nos gatilhos
+4. Gerencie dependências com `skills-lock.json` para reprodutibilidade
+
+**Fluxo de trabalho:**
+```bash
+# Buscar skills disponíveis
+npx skills find video processing
+
+# Instalar uma skill
+npx skills add digitalsamba/claude-code-video-toolkit@ffmpeg
+
+# Verificar atualizações
+npx skills check
+
+# Atualizar todas
+npx skills update
+```
+
+**Criando sua própria skill:**
+1. Crie uma estrutura com `SKILL.md` (descrição, gatilhos) e `reference.md` (exemplos)
+2. Publique em um repositório GitHub
+3. Outros podem instalar com `npx skills add seu-usuario/sua-skill`
+4. Combine múltiplas skills para criar agentes especializados
+
+**Exemplo de invocação:**
+```
+@agent Converta esse GIF para MP4 otimizado para web
+# O agente usa a skill ffmpeg automaticamente
+```
+
+**Personalização:**
+Edite os arquivos em `.agents/skills/` para customizar ou criar novas skills. O `skills-lock.json` garante que todos os desenvolvedores usem as mesmas versões.
+
 ## Resumo das Tecnologias
 Pendente...
