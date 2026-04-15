@@ -178,5 +178,79 @@ npx skills update
 **Personalização:**
 Edite os arquivos em `.agents/skills/` para customizar ou criar novas skills. O `skills-lock.json` garante que todos os desenvolvedores usem as mesmas versões.
 
+### Módulo 04: CypherSuite MCP: Desenvolvendo MCPs do zero
+
+**Projeto:** [MCP do Zero](module-04)
+
+**Tecnologias utilizadas:**
+- **@modelcontextprotocol/sdk** - SDK oficial para criação de servidores MCP
+- **Node.js Crypto** - Módulo nativo para criptografia (AES-256-CBC, scrypt)
+- **TypeScript** - Linguagem tipada para desenvolvimento robusto
+- **Zod** - Validação de schemas de entrada e saída
+- **VS Code Copilot Chat** - Cliente MCP integrado ao editor
+
+**Conceitos abordados:**
+- Arquitetura de servidores MCP (Model Context Protocol)
+- Três tipos de capacidades: Tools, Resources, Prompts
+- Implementação de criptografia AES-256-CBC com derivação de chaves scrypt
+- Comunicação via stdio (entrada/saída padrão)
+- Validação de schemas com Zod
+- Publicação de pacotes MCP para uso no VS Code
+- MCP Inspector para testes interativos
+
+**Aplicação prática:**
+Este projeto demonstra como criar um servidor MCP completo "do zero" usando o SDK oficial. O servidor fornece capacidades de criptografia que podem ser usadas diretamente no VS Code Copilot Chat:
+
+**Tools (ferramentas executáveis):**
+- `encrypt_message` — Criptografa qualquer texto com uma senha (AES-256-CBC)
+- `decrypt_message` — Descriptografa mensagens com a mesma senha
+
+**Resources (recursos consultáveis):**
+- `encryption://info` — Documentação técnica do algoritmo, derivação de chaves e formato de saída
+
+**Prompts (templates de uso):**
+- `encrypt_message_prompt` — Template pré-construído para pedir criptografia
+- `decrypt_message_prompt` — Template pré-construído para pedir descriptografia
+
+**Como usar:**
+1. **No VS Code:** Adicione o servidor em `.vscode/mcp.json`:
+   ```json
+   {
+     "servers": {
+       "ciphersuite-mcp": {
+         "command": "node",
+         "args": ["--experimental-strip-types", "caminho/para/module-04/src/index.ts"]
+       }
+     }
+   }
+   ```
+2. **Recarregue o VS Code** (Cmd+Shift+P → Developer: Reload Window)
+3. **Use no Copilot Chat:**
+   - "Encrypt the message 'Hello World' with passphrase 'secret'"
+   - "Decrypt this message: a3f1...:ciphertext using key 'secret'"
+   - "Show me the encryption://info resource"
+
+**Testando com MCP Inspector:**
+```bash
+npm run mcp:inspect
+```
+Abre uma interface web para explorar todas as ferramentas, recursos e prompts interativamente.
+
+**Publicação como pacote npm:**
+```bash
+npm publish --access public
+```
+Depois outros podem usar com:
+```json
+{
+  "servers": {
+    "ciphersuite-mcp": {
+      "command": "npx",
+      "args": ["-y", "@leofonsilva/ciphersuite-mcp"]
+    }
+  }
+}
+```
+
 ## Resumo das Tecnologias
 Pendente...

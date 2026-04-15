@@ -1,5 +1,5 @@
 {
-  "name": "05-mcps-do-zero-template",
+  "name": "mcp-do-zero",
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
@@ -16,8 +16,8 @@
     "node": "v24.14.0"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.27.1",
-    "@types/node": "^24.11.0",
-    "zod": "^3.25.76"
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@types/node": "^25.6.0",
+    "zod": "^4.3.6"
   }
 }
