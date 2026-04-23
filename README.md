@@ -252,5 +252,98 @@ Depois outros podem usar com:
 }
 ```
 
+### Módulo 05: Transformando sua empresa em um servidor MCP
+**Projeto:** [Customers MCP](module-05)
+
+**Tecnologias utilizadas:**
+- **@modelcontextprotocol/sdk** - SDK oficial para criação de servidores MCP
+- **Fastify** - Framework web para API REST de clientes (no subprojeto)
+- **TypeScript** - Linguagem tipada para desenvolvimento robusto
+- **Zod** - Validação de schemas de entrada e saída
+- **Node.js Fetch API** - Cliente HTTP para comunicação com API
+- **VS Code Copilot Chat** - Cliente MCP integrado ao editor
+
+**Conceitos abordados:**
+- Arquitetura de servidores MCP com Tools, Resources e Prompts
+- Padrão arquitetural Clean Architecture (Domain, Application, Infrastructure)
+- Separação de responsabilidades: Serviços, Clientes HTTP, Entidades
+- Validação de dados com Zod em múltiplas camadas
+- Encapsulamento de APIs REST existentes como ferramentas MCP
+- CRUD completo (Create, Read, Update, Delete) exposto ao LLM
+- Busca flexível de clientes (por ID, nome ou telefone)
+- Tratamento de erros e mensagens amigáveis para IA
+
+**Aplicação prática:**
+Este projeto demonstra como criar um servidor MCP que encapsula uma API REST de clientes, permitindo que um LLM gerencie registros de clientes através de comandos naturais.
+
+**Tools (ferramentas executáveis):**
+- `list_customers` — Retorna todos os clientes cadastrados
+- `get_customer` — Busca um cliente por ID, nome ou telefone (busca flexível)
+- `create_customer` — Cria um novo cliente (name, phone)
+- `update_customer` — Atualiza nome e/ou telefone de um cliente existente
+- `delete_customer` — Remove um cliente pelo ID
+
+**Resources (recursos consultáveis):**
+- `customers://api-info` — Documentação da API REST encapsulada (endpoints, formato de dados)
+
+**Prompts (templates de uso):**
+- `find_customer_prompt` — Template para buscar clientes usando critérios flexíveis
+
+**Como usar:**
+1. **Configure a API de clientes** (subprojeto `nodejs-fastify-mongodb-crud/`):
+   ```bash
+   cd module-05/nodejs-fastify-mongodb-crud
+   npm install
+   npm run docker:infra:up # Roda a API em um container docker para atender o MCP
+   ```
+
+2. **Inicie o servidor MCP:**
+   ```bash
+   cd module-05
+   npm install
+   npm run dev
+   ```
+
+3. **No VS Code:** Adicione em `.vscode/mcp.json`:
+   ```json
+   {
+     "servers": {
+       "customers-mcp": {
+         "command": "node",
+         "args": ["--experimental-strip-types", "module-05/src/index.ts"]
+       }
+     }
+   }
+   ```
+
+4. **Use no Copilot Chat:**
+   - "List all customers"
+   - "Find customer with phone 555-0100"
+   - "Create a new customer named John Doe with phone 555-1234"
+   - "Update customer with id 'abc123' to change name to Jane Smith"
+   - "Delete customer with id 'abc123'"
+
+**Testando com MCP Inspector:**
+```bash
+npm run mcp:inspect
+```
+Explora interativamente todas as ferramentas, recursos e prompts no navegador.
+
+**Publicação como pacote npm:**
+```bash
+npm publish --access public
+```
+Uso por outros:
+```json
+{
+  "servers": {
+    "customers-mcp": {
+      "command": "npx",
+      "args": ["-y", "@leofonsilva/customers-mcp"]
+    }
+  }
+}
+```
+
 ## Resumo das Tecnologias
 Pendente...
