@@ -100,8 +100,8 @@ describe('API Workflow', () => {
 
     it('given 5 different customers it should have valid list', async () => {
       const customers = [
-        { name: 'Erick Wendel', phone: '123456789' },
-        { name: 'Ana Neri', phone: '123456789' },
+        { name: 'Leonardo Fonseca', phone: '123456789' },
+        { name: 'Tamara Resende', phone: '123456789' },
         { name: 'Shrek de Souza', phone: '123456789' },
         { name: 'Nemo de Oliveira', phone: '123456789' },
         { name: 'Buzz da Rocha', phone: '123456789' },
