@@ -345,5 +345,140 @@ Uso por outros:
 }
 ```
 
+### Módulo 06: Segurança e governança em MCPs
+**Projeto:** [Customers MCP v2](module-06)
+
+**Tecnologias utilizadas:**
+- **@modelcontextprotocol/sdk** - SDK oficial para criação de servidores MCP
+- **Fastify** - Framework web para API REST de clientes (subprojeto)
+- **TypeScript** - Linguagem tipada com tipos inferidos
+- **Zod** - Validação de schemas em múltiplas camadas
+- **Node.js Fetch API** - Cliente HTTP com interceptação de erros
+- **VS Code Copilot Chat** - Cliente MCP integrado
+- **JWT / Bearer Token** - Autenticação entre serviços
+
+**Conceitos abordados:**
+- Servidor MCP que **depende de uma API interna** para operações reais
+- Autenticação service-to-service com tokens Bearer
+- Tratamento de erros específicos (401, 403, 429) com classes customizadas
+- Separação de responsabilidades mantida (Domain, Application, Infrastructure)
+- Validação dupla: Zod nos schemas MCP + validação na API
+- Logs de erro amigáveis para LLMs (sem vazar detalhes internos)
+- Padrão Repository com cliente HTTP reutilizável
+- Configuração via variáveis de ambiente (SERVICE_TOKEN obrigatório)
+
+**Aplicação prática:**
+Este projeto é uma evolução do module-05, adicionando **autenticação e tratamento de erros robusto**. O servidor MCP atua como **gateway seguro** para uma API REST de clientes, exigindo um token de serviço para operações.
+
+**Tools (ferramentas MCP):**
+- `list_customers` — Lista todos os clientes (requer token válido)
+- `get_customer` — Busca por ID, nome ou telefone (flexível)
+- `create_customer` — Cria novo cliente {name, phone}
+- `update_customer` — Atualiza cliente por _id
+- `delete_customer` — Remove cliente por _id
+
+**Resources:**
+- `customers://api-info` — Documentação da API REST (endpoints, formato)
+
+**Prompts:**
+- `find_customer_prompt` — Template para buscas flexíveis
+
+**Como usar (passo a passo):**
+
+**1. Configure a API de clientes** (subprojeto `nodejs-fastify-mongodb-crud/`):
+```bash
+cd module-06/nodejs-fastify-mongodb-crud
+npm install
+npm run docker:infra:up   # Sobe MongoDB + API em containers
+# API rodará em http://localhost:9999/v1
+```
+
+**2. Gere um token de serviço** (ou use o script fornecido):
+```bash
+# Opção A: Use o script fornecido (se existir)
+./getServiceToken.sh
+
+# Opção B: Gere manualmente via API de auth (depende da implementação)
+# Consulte a documentação da API para endpoint de token
+```
+
+**3. Configure a variável de ambiente:**
+```bash
+export SERVICE_TOKEN="seu-token-aqui"
+# Ou crie um arquivo .env na raiz do module-06
+```
+
+**4. Inicie o servidor MCP:**
+```bash
+cd module-06
+npm install
+npm run dev
+# Log: "Customers MCP Server running on stdio"
+```
+
+**5. Adicione no VS Code** (`.vscode/mcp.json`):
+```json
+{
+  "servers": {
+    "customers-mcp": {
+      "command": "node",
+      "args": ["--experimental-strip-types", "./src/index.ts"],
+      "env": {
+        "SERVICE_TOKEN": "token-hash" // Gerado através do comando "sh getServiceToken.sh". Após, escolha qual role deseja usar
+      },
+    }
+  }
+}
+```
+**Importante:** O servidor NÃO inicia sem `SERVICE_TOKEN` definido (validação no index.ts).
+
+**6. Use no Copilot Chat:**
+```
+List all customers
+Find customer with phone 555-0100
+Create customer named "John Doe" with phone 555-1234
+Update customer with id "abc123" to name "Jane Smith"
+Delete customer with id "abc123"
+```
+
+**Testando com MCP Inspector:**
+```bash
+npm run mcp:inspect
+```
+Abre UI web para explorar tools, resources e prompts.
+
+**Tratamento de erros (o LLM vê):**
+- **401 Unauthorized**: "Unauthorized: service token is missing or invalid"
+- **403 Forbidden**: "Forbidden: token does not have sufficient permissions"
+- **429 Rate Limit**: "Rate limit exceeded. Please try again later."
+- **Outros**: "HTTP {status} - {statusText}" (sem stack trace)
+
+**Fluxo de autenticação:**
+```
+LLM → MCP Server (module-06) → Bearer Token → API Fastify (module-05/nodejs-fastify-mongodb-crud) → MongoDB
+         ↑                                                    ↑
+    SERVICE_TOKEN required                          Validação JWT/role (se houver)
+```
+
+**Publicação como pacote npm:**
+```bash
+npm publish --access public
+```
+Uso por outros:
+```json
+{
+  "servers": {
+    "customers-mcp": {
+      "command": "npx",
+      "args": ["-y", "@leofonsilva/customers-mcp"],
+      "env": {
+        "SERVICE_TOKEN": "token-hash"
+      },
+    }
+  }
+}
+```
+**Aviso:** O pacote requer `SERVICE_TOKEN` configurado no ambiente do usuário.
+
 ## Resumo das Tecnologias
 Pendente...

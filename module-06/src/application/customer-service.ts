@@ -1,45 +1,57 @@
 import type { Customer, CustomerQuery, CustomerMutation } from "../domain/customer.ts";
 import { CustomerHttpClient } from "../infrastructure/customer-http-client.ts";
 
+// Serviço que orquestra as operações de cliente (camada de aplicação)
 export class CustomerService {
-    private readonly client: CustomerHttpClient;
+  private readonly client: CustomerHttpClient;  // Cliente HTTP para fazer requisições à API
 
-    constructor(baseUrl: string, serviceToken: string) {
-        this.client = new CustomerHttpClient(baseUrl, serviceToken);
-    }
+  constructor(baseUrl: string, serviceToken: string) {
+    // Inicializa o cliente com a URL base e token de serviço (autenticação entre sistemas)
+    this.client = new CustomerHttpClient(baseUrl, serviceToken);
+  }
 
-    async listCustomers(): Promise<Customer[]> {
-        return this.client.listCustomers()
-    }
+  // Retorna a lista completa de clientes
+  async listCustomers(): Promise<Customer[]> {
+    return this.client.listCustomers()
+  }
 
-    async createCustomer(customer: Omit<Customer, '_id'>) {
-        return this.client.createCustomer(customer)
-    }
+  // Cria um novo cliente (sem o _id, que é gerado pelo servidor)
+  async createCustomer(customer: Omit<Customer, '_id'>) {
+    return this.client.createCustomer(customer)
+  }
 
-    async findCustomer(query: CustomerQuery): Promise<Customer | null> {
-        if(query._id) return this.client.getCustomerById(query._id)
+  // Busca um cliente por ID ou por outros campos (busca flexível)
+  async findCustomer(query: CustomerQuery): Promise<Customer | null> {
+    // Se a busca for por ID, usa o endpoint específico (mais eficiente)
+    if (query._id) return this.client.getCustomerById(query._id)
 
-        const customers = await this.client.listCustomers()
-        return (
-            customers.find(customer => {
-                const entries = Object.entries(query) as [keyof Customer, string][]
+    // Caso contrário, busca todos os clientes e filtra localmente
+    const customers = await this.client.listCustomers()
+    return (
+      customers.find(customer => {
+        // Converte o objeto de busca em um array de [campo, valor]
+        const entries = Object.entries(query) as [keyof Customer, string][]
 
-                return entries.every(([key, value]) => {
-                    const customerValue = customer[key]
-                    return customerValue?.includes(value)
-                })
-            })
-        ) ?? null
-    }
+        // Verifica se o cliente corresponde a TODOS os campos da busca
+        return entries.every(([key, value]) => {
+          const customerValue = customer[key]
+          // Verifica se o valor do cliente contém o valor buscado (busca parcial)
+          return customerValue?.includes(value)
+        })
+      })
+    ) ?? null  // Retorna null se nenhum cliente for encontrado
+  }
 
-    async updateCustomer(
-        id: string,
-        data: Partial<Omit<Customer, '_id'>>
-    ): Promise<CustomerMutation> {
-        return this.client.updateCustomer(id, data);
-    }
+  // Atualiza os dados de um cliente existente
+  async updateCustomer(
+    id: string,
+    data: Partial<Omit<Customer, '_id'>>
+  ): Promise<CustomerMutation> {
+    return this.client.updateCustomer(id, data);
+  }
 
-    async deleteCustomer(id: string): Promise<CustomerMutation> {
-        return this.client.deleteCustomer(id);
-    }
+  // Remove um cliente pelo ID
+  async deleteCustomer(id: string): Promise<CustomerMutation> {
+    return this.client.deleteCustomer(id);
+  }
 }

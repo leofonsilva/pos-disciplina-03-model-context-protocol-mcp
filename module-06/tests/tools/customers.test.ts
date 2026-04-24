@@ -4,23 +4,28 @@ import { createTestClient, getServiceToken } from '../helpers.ts'
 import { Client } from '@modelcontextprotocol/sdk/client'
 import type { Customer, CustomerMutation } from '../../src/domain/customer.ts'
 
+// Tipos auxiliares para extrair o conteúdo estruturado das respostas
 type CustomerResult = { structuredContent: { customer?: Customer | null, isError: boolean, message?: string } }
 type CustomersResult = { structuredContent: { customers?: Customer[], isError: boolean, message?: string } }
 type MutationToolResult = { structuredContent: CustomerMutation }
 
+// Testes das ferramentas (tools) do servidor MCP de clientes
 describe('Customer Tools', async () => {
   let client: Client
-  let createdId: string
+  let createdId: string   // Armazena o ID do cliente criado para usar nos testes seguintes
 
+  // beforeEach: cria um novo cliente antes de cada teste
   beforeEach(async () => {
-    const serviceToken = await getServiceToken()
-    client = await createTestClient(serviceToken)
+    const serviceToken = await getServiceToken()    // Obtém token de serviço para autenticação
+    client = await createTestClient(serviceToken)   // Inicia o servidor e conecta o cliente
   })
 
+  // afterEach: fecha a conexão depois de cada teste
   afterEach(async () => {
     await client.close()
   })
 
+  // Teste 1: listar todos os clientes
   it('should list all customers', async () => {
     const result = await client.callTool({
       name: 'list_customers',
@@ -30,6 +35,7 @@ describe('Customer Tools', async () => {
     assert.ok(Array.isArray(result.structuredContent.customers), 'Should return an array of customers')
   })
 
+  // Teste 2: criar um cliente
   it('should create a customer', async () => {
     const result = await client.callTool({
       name: 'create_customer',
@@ -38,9 +44,10 @@ describe('Customer Tools', async () => {
 
     assert.ok(result.structuredContent.id, 'Should return the new customer id')
     assert.ok(result.structuredContent.message?.includes('Test MCP User'), 'Confirmation message should include customer name')
-    createdId = result.structuredContent.id
+    createdId = result.structuredContent.id   // Salva o ID para os próximos testes
   })
 
+  // Teste 3: buscar cliente por ID
   it('should get a customer by _id', async () => {
     const result = await client.callTool({
       name: 'get_customer',
@@ -51,6 +58,7 @@ describe('Customer Tools', async () => {
     assert.strictEqual(result.structuredContent.customer!.name, 'Test MCP User')
   })
 
+  // Teste 4: buscar cliente por nome
   it('should get a customer by name', async () => {
     const result = await client.callTool({
       name: 'get_customer',
@@ -61,6 +69,7 @@ describe('Customer Tools', async () => {
     assert.strictEqual(result.structuredContent.customer!.phone, '999-000-0001')
   })
 
+  // Teste 5: atualizar cliente
   it('should update a customer', async () => {
     const result = await client.callTool({
       name: 'update_customer',
@@ -71,6 +80,7 @@ describe('Customer Tools', async () => {
     assert.strictEqual(result.structuredContent.id, createdId)
   })
 
+  // Teste 6: verificar se a atualização foi aplicada
   it('should reflect the update when getting by id', async () => {
     const result = await client.callTool({
       name: 'get_customer',
@@ -81,6 +91,7 @@ describe('Customer Tools', async () => {
     assert.strictEqual(result.structuredContent.customer!.phone, '999-000-0002')
   })
 
+  // Teste 7: deletar cliente
   it('should delete a customer', async () => {
     const result = await client.callTool({
       name: 'delete_customer',
@@ -90,6 +101,7 @@ describe('Customer Tools', async () => {
     assert.ok(result.structuredContent.message, 'Should return a confirmation message')
   })
 
+  // Teste 8: verificar que cliente deletado não é mais encontrado
   it('should return null when getting a deleted customer by name', async () => {
     const result = await client.callTool({
       name: 'get_customer',
@@ -97,9 +109,9 @@ describe('Customer Tools', async () => {
     }) as unknown as CustomerResult
 
     assert.ok(!result.structuredContent?.customer, 'Deleted customer should not be found')
-
   })
 
+  // Teste 9: tentar deletar com ID inválido deve retornar erro
   it('should return isError when deleting with an invalid id', async () => {
     const result = await client.callTool({
       name: 'delete_customer',
@@ -110,6 +122,7 @@ describe('Customer Tools', async () => {
     assert.strictEqual(result.structuredContent.message, 'Failed to delete customer. Error: HTTP 400 - Bad Request - {"message":"the id is invalid!","id":"not-a-valid-id"}', 'Error message should indicate full error message')
   })
 
+  // Teste 10: token de serviço inválido deve retornar erro de autenticação
   it('should return isError when service token is invalid (list_customers)', async () => {
     const client = await createTestClient('invalid-token-that-does-not-exist');
     try {
@@ -128,10 +141,11 @@ describe('Customer Tools', async () => {
     }
   });
 
+  // Teste 11: verificar o rate limiting (limite de requisições)
   it('should reach rate limit', async () => {
-
     let result: CustomersResult = { structuredContent: { isError: false, message: '' } };
-    const maxAttempts = 100;
+    const maxAttempts = 100;  // Tenta várias requisições até bater o limite
+    
     for (let index = 0; index < maxAttempts; index++) {
       result = await client.callTool({
         name: 'list_customers',
@@ -139,12 +153,11 @@ describe('Customer Tools', async () => {
       }) as unknown as CustomersResult
 
       if (result.structuredContent.isError) {
-        break;
+        break;  // Sai do loop quando atingir o rate limit
       }
     }
 
     assert.ok(result.structuredContent.isError, 'Should return isError: true for rate limit exceeded');
     assert.strictEqual(result.structuredContent.message, 'Failed to list customers. Error: Rate limit exceeded. Please try again later.', 'Error message should indicate full error message')
   })
-
 })

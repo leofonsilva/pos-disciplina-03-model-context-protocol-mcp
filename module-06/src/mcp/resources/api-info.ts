@@ -1,19 +1,20 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
+// Registra um recurso informativo sobre a API de clientes que o servidor MCP encapsula
 export function registerApiInfoResource(
-    server: McpServer,
-    baseUrl: string
+  server: McpServer,
+  baseUrl: string
 ): void {
-    server.registerResource(
-        "customers://api-info",
-        "customers://api-info",
-        { description: "Describes the Customers REST API that this MCP server wraps." },
-        async () => ({
-            contents: [
-                {
-                    uri: "customers://api-info",
-                    mimeType: "text/plain",
-                    text: `
+  server.registerResource(
+    "customers://api-info",                    // Nome do recurso
+    "customers://api-info",                    // URI (endereço único do recurso)
+    { description: "Describes the Customers REST API that this MCP server wraps." },
+    async () => ({                             // Função que retorna o conteúdo do recurso
+      contents: [
+        {
+          uri: "customers://api-info",
+          mimeType: "text/plain",              // Tipo do conteúdo (texto simples)
+          text: `
 Customers API
   Base URL : ${baseUrl}
   Endpoints:
@@ -25,8 +26,8 @@ Customers API
 
   Customer shape: { _id: string, name: string, phone: string }
 `.trim(),
-                },
-            ],
-        })
-    );
+        },
+      ],
+    })
+  );
 }
