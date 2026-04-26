@@ -329,22 +329,6 @@ npm run mcp:inspect
 ```
 Explora interativamente todas as ferramentas, recursos e prompts no navegador.
 
-**Publicação como pacote npm:**
-```bash
-npm publish --access public
-```
-Uso por outros:
-```json
-{
-  "servers": {
-    "customers-mcp": {
-      "command": "npx",
-      "args": ["-y", "@leofonsilva/customers-mcp"]
-    }
-  }
-}
-```
-
 ### Módulo 06: Segurança e governança em MCPs
 **Projeto:** [Customers MCP v2](module-06)
 
@@ -460,25 +444,167 @@ LLM → MCP Server (module-06) → Bearer Token → API Fastify (module-05/nodej
     SERVICE_TOKEN required                          Validação JWT/role (se houver)
 ```
 
-**Publicação como pacote npm:**
+### Módulo 07: Publicação e Distribuição de MCPs
+**Projeto:** [Customers MCP v3](module-07)
+
+**Tecnologias utilizadas:**
+- **@modelcontextprotocol/sdk** - SDK oficial para criação de servidores MCP
+- **Fastify** - Framework web para API REST de clientes (subprojeto)
+- **TypeScript** - Linguagem tipada com suporte a shebang executável
+- **Zod** - Validação de schemas em múltiplas camadas
+- **Node.js Fetch API** - Cliente HTTP com autenticação Bearer
+- **VS Code Copilot Chat** - Cliente MCP integrado
+- **Verdaccio** - Registry npm privado para testes de publicação
+- **npm** - Gerenciador de pacotes e distribuição
+- **tsx** - Executor TypeScript com shebang support
+
+**Conceitos abordados:**
+- Publicação de pacotes MCP no npm (registry público e privado)
+- Automação de versionamento e release com npm scripts
+- Configuração de registry privado (Verdaccio) para testes
+- Shebang executável (`#!/usr/bin/env tsx`) para CLI tools
+- Gerenciamento de tokens de autenticação (NPM_TOKEN)
+- Versionamento semântico (`npm version patch/minor/major`)
+- Distribuição de ferramentas MCP como pacotes reutilizáveis
+- Boas práticas para pacotes CLI (bin field, files array)
+- Separação de ambientes (development vs production)
+
+**Aplicação prática:**
+Este módulo é uma evolução do module-06, com foco em **publicação e distribuição** do servidor MCP como pacote npm. O projeto demonstra como transformar um servidor MCP em uma ferramenta CLI instalável globalmente, com suporte a registry privado para testes.
+
+**Scripts de publicação disponíveis:**
+
 ```bash
-npm publish --access public
+# Registry privado (Verdaccio)
+npm run registry:start              # Sobe registry em http://localhost:4873
+npm run registry:adduser.private    # Cria usuário no registry privado
+npm run registry:login:private      # Login no registry privado
+npm run release:private             # Versiona e publica no registry privado
+
+# Registry público (npmjs.org)
+npm run registry:login:public       # Login no npmjs (usa NPM_TOKEN)
+npm run release:public              # Versiona e publica no npm público
 ```
-Uso por outros:
+
+**Fluxo de trabalho completo:**
+
+**1. Desenvolvimento local:**
+```bash
+cd module-07
+npm install
+npm run dev                         # Testa o servidor MCP localmente
+npm test                            # Roda testes
+npm run mcp:inspect                 # Inspeciona ferramentas
+```
+
+**2. Teste de publicação (registry privado):**
+```bash
+# Sobre Verdaccio (registry local)
+npm run registry:start              # Docker sobe Verdaccio em localhost:4873
+
+# Configura autenticação
+npm run registry:adduser.private    # Cria usuário (ex: leofonsilva)
+npm run registry:login:private      # Login interativo
+
+# Publica no registry privado
+npm run release:private             # npm version patch && npm publish --registry http://localhost:4873
+```
+
+**3. Publicação em produção (npmjs):**
+```bash
+# Configura token de acesso ao npmjs (uma vez apenas)
+# No CI/CD ou local: export NPM_TOKEN="seu-token-aqui"
+# .npmrc já está configurado para usar ${NPM_TOKEN}
+
+# Login (se necessário)
+npm run registry:login:public       # Usa NPM_TOKEN do .npmrc
+
+# Release
+npm run release:public              # npm version patch && npm publish --access public
+```
+
+**4. Uso como pacote global:**
+```bash
+# Instalação global (após publicação no npmjs)
+npm install -g @leofonsilva/customers-mcp
+
+# Execução direta (binário customers-mcp)
+customers-mcp                       # Inicia servidor MCP (requer SERVICE_TOKEN)
+
+# Ou via npx (sem instalação global)
+npx @leofonsilva/customers-mcp
+```
+
+**Configuração necessária no ambiente do usuário:**
+```bash
+# Variável de ambiente para autenticação na API interna
+export SERVICE_TOKEN="token-da-sua-api"
+
+# Token npm para publicação (CI/CD ou local)
+export NPM_TOKEN="token-do-npmjs"
+```
+
+**Como usar (após instalação):**
+
+**No VS Code** (`.vscode/mcp.json`):
 ```json
 {
   "servers": {
     "customers-mcp": {
-      "command": "npx",
-      "args": ["-y", "@leofonsilva/customers-mcp"],
+      "command": "customers-mcp",
+      "args": [],
       "env": {
-        "SERVICE_TOKEN": "token-hash"
-      },
+        "SERVICE_TOKEN": "token-da-api-interna"
+      }
     }
   }
 }
 ```
-**Aviso:** O pacote requer `SERVICE_TOKEN` configurado no ambiente do usuário.
+
+**No Copilot Chat:**
+```
+List all customers
+Create customer "John Doe" with phone "555-1234"
+Find customer with phone "555-1234"
+Update customer id "abc123" to name "Jane Smith"
+Delete customer id "abc123"
+```
+
+**Testando antes de publicar:**
+```bash
+# 1. Sobe registry privado
+npm run registry:start
+
+# 2. Publica no registry local
+npm run release:private
+
+# 3. Em outro terminal, instala a partir do registry local
+npm install --registry http://localhost:4873 @leofonsilva/customers-mcp
+
+# 4. Testa a instalação
+customers-mcp --help  # Se implementado
+```
+
+**Versionamento semântico automático:**
+```bash
+# Aumenta patch (0.0.1 → 0.0.2)
+npm run release:private  # executa: npm version patch && npm publish
+
+# Aumenta minor (0.0.2 → 0.1.0)
+npm version minor && npm publish
+
+# Aumenta major (0.1.0 → 1.0.0)
+npm version major && npm publish
+```
+
+**Publicação em CI/CD (exemplo GitHub Actions):**
+```yaml
+- name: Publish to npm
+  run: |
+    npm config set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+    npm version patch -m "chore: release v%s"
+    npm publish --access public
+```
 
 ## Resumo das Tecnologias
 Pendente...

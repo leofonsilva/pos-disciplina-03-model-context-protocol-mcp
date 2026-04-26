@@ -1,6 +1,6 @@
 {
   "name": "@leofonsilva/customers-mcp",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "MCP server that exposes a customer CRUD API as tools for use with GitHub Copilot and other MCP-compatible agents",
   "main": "index.js",
   "bin": {
@@ -19,9 +19,18 @@
     "test:unit:dev": "node --inspect --test --watch tests/**/*unit.test.ts",
     "test:unit": "node --inspect --test tests/**/*unit.test.ts",
     "test:e2e:dev": "node --inspect --test --watch tests/**/*e2e.test.ts",
-    "test:e2e": "node --inspect --test tests/**/*e2e.test.ts"
+    "test:e2e": "node --inspect --test tests/**/*e2e.test.ts",
+    "registry:start": "docker compose up -d",
+    "registry:stop": "docker compose down",
+    "registry:adduser.private": "npm adduser --registry http://localhost:4873/",
+    "registry:login:private": "npm login --registry http://localhost:4873",
+    "release:private": "npm version patch && npm publish --registry http://localhost:4873",
+    "registry:login:public": "npm login --registry=https://registry.npmjs.org/",
+    "release:public": "npm version patch && npm publish --access public"
   },
   "keywords": [],
+  "author": "leofonsilva",
+  "license": "ISC",
   "type": "module",
   "engines": {
     "node": "v24.14.0"
@@ -29,6 +38,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@types/node": "^25.6.0",
+    "tsx": "^4.21.0",
     "zod": "^4.3.6"
   }
 }

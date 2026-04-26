@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "customers-mcp": {
+      "command": "npx",
+      // "args": ["-y", "--registry", "http://localhost:4873", "@leofonsilva/customers-mcp@latest"], // Pelo Verdaccio
+      "args": ["-y", "@leofonsilva/customers-mcp@latest"], // Pelo npm js
+      "env": {
+        "SERVICE_TOKEN": "1a8d839a-43b4-406b-a3f2-c729ffcd748f" // Gerado através do comando "sh getServiceToken.sh". Após, escolha qual role deseja usar
+      },
+    }
+  }
+}
