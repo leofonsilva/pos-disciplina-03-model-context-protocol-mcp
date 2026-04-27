@@ -1,7 +1,9 @@
 # Pós Disciplina 03 – Model Context Protocol (MCP)
 
 ## Introdução
-Pendente...
+Este repositório contém todos os projetos desenvolvidos durante a disciplina **Model Context Protocol (MCP)**, abordando desde conceitos fundamentais do protocolo MCP até implementações avançadas em produção, integração com LLMs e técnicas de segurança e governança.
+
+Cada módulo foi desenvolvido para demonstrar na prática como o Model Context Protocol revoluciona a forma como conectamos Large Language Models (LLMs) a APIs, bancos de dados e serviços internos. O repositório explora desde o uso de servidores MCP existentes até o desenvolvimento do zero, publicação de pacotes npm, e integração com frameworks como LangChain e LangGraph, utilizando TypeScript como linguagem principal.
 
 ## Módulos
 
@@ -439,12 +441,12 @@ Abre UI web para explorar tools, resources e prompts.
 
 **Fluxo de autenticação:**
 ```
-LLM → MCP Server (module-06) → Bearer Token → API Fastify (module-05/nodejs-fastify-mongodb-crud) → MongoDB
+LLM → MCP Server (module-06) → Bearer Token → API Fastify (module-06/nodejs-fastify-mongodb-crud) → MongoDB
          ↑                                                    ↑
     SERVICE_TOKEN required                          Validação JWT/role (se houver)
 ```
 
-### Módulo 07: Publicação e Distribuição de MCPs
+### Módulo 07: MCP em produção
 **Projeto:** [Customers MCP v3](module-07)
 
 **Tecnologias utilizadas:**
@@ -605,6 +607,157 @@ npm version major && npm publish
     npm version patch -m "chore: release v%s"
     npm publish --access public
 ```
+Bearer Token → API Fastify (module-06/nodejs-fastify-mongodb-crud) → MongoDB
+         ↑                                                    ↑
+    SERVICE_TOKEN required                          Validação JWT/role (se houver)
+```
+
+**Publicação como pacote npm:**
+```bash
+npm publish --access public
+```
+Uso por outros:
+```json
+{
+  "servers": {
+    "customers-mcp": {
+      "command": "npx",
+      "args": ["-y", "@leofonsilva/customers-mcp"],
+      "env": {
+        "SERVICE_TOKEN": "token-hash"
+      },
+    }
+  }
+}
+```
+**Aviso:** O pacote requer `SERVICE_TOKEN` configurado no ambiente do usuário.
+
+### Módulo 08: Usando nosso MCP com Langchain.js
+**Projeto:** [Multiple MCP Tools](module-08)
+
+**Tecnologias utilizadas:**
+- **Fastify** - Framework web rápido e de baixo overhead para Node.js
+- **LangGraph** - Framework para construção de grafos de agentes com estado
+- **@langchain/mcp-adapters** - Adaptador para integração com servidores MCP
+- **@langchain/openai** - Cliente para acesso a modelos via OpenRouter
+- **LangChain** - Framework para integração de LLMs com ferramentas e agentes
+- **@modelcontextprotocol/sdk** - SDK oficial para criação de servidores MCP
+- **MultiServerMCPClient** - Gerenciamento de múltiplos servidores MCP
+- **TypeScript** - Linguagem tipada para desenvolvimento robusto
+- **Zod** - Validação de schemas (usado nos servidores MCP)
+
+**Conceitos abordados:**
+- Integração de servidores MCP customizados com LangChain
+- Uso de pacotes MCP publicados no npm em agentes LangChain
+- MultiServerMCPClient para gerenciar múltiplos servidores MCP simultaneamente
+- Tool calling em LangChain com ferramentas MCP (customers CRUD + filesystem)
+- LangGraph para orquestração de agentes com estado e tratamento de erros
+- Comunicação stdio entre LangChain e servidores MCP
+- Autenticação service-to-service via tokens de ambiente
+- Callbacks e logging para monitoramento de execução de ferramentas
+- Separação de responsabilidades: servidor HTTP, agente LangGraph, serviços MCP
+
+**Aplicação prática:**
+Este projeto demonstra como integrar servidores MCP customizados (desenvolvidos em módulos anteriores) com o framework LangChain para criar agentes inteligentes capazes de executar operações complexas. O sistema implementa um servidor HTTP Fastify que expõe um endpoint `/chat` para interações com um agente LangGraph, que tem acesso a ferramentas MCP para gerenciamento de clientes (CRUD) e operações no sistema de arquivos.
+
+O agente pode:
+- Criar, listar, atualizar e deletar clientes via ferramentas MCP
+- Salvar dados em arquivos JSON no sistema de arquivos
+- Responder perguntas gerais e executar tarefas autônomas
+- Usar pacotes MCP publicados no npm (customers-mcp) e servidores oficiais (@modelcontextprotocol/server-filesystem)
+
+**Como usar:**
+1. **Configure a API de clientes** (subprojeto `nodejs-fastify-mongodb-crud/`):
+   ```bash
+   cd module-08/nodejs-fastify-mongodb-crud
+   npm install
+   npm run docker:infra:up   # Sobe MongoDB + API em containers
+   ```
+
+2. **Configure variáveis de ambiente:**
+   ```bash
+   export SERVICE_TOKEN="token-da-api-interna"  # Para autenticação no customers-mcp
+   export OPENROUTER_API_KEY="sua-chave-openrouter"
+   ```
+
+3. **Inicie o servidor:**
+   ```bash
+   cd module-08
+   npm install
+   npm run dev
+   ```
+
+4. **Teste o endpoint /chat:**
+   ```bash
+   curl -X POST http://localhost:3000/chat \
+     -H "Content-Type: application/json" \
+     -d '{"question": "Crie 3 clientes de teste e salve em ./data/users.json"}'
+   ```
+
+**Exemplo de uso no Copilot Chat (VS Code):**
+Após configurar os servidores MCP no `.vscode/mcp.json`, você pode usar comandos naturais:
+```
+Create 5 test customers and save them to a JSON file
+List all customers and update the first one
+Delete customers with phone starting with 555
+```
+
+**Arquitetura:**
+```
+Usuário → Fastify (/chat) → LangGraph Agent → LangChain Tools → MCP Servers
+                                      ↓
+                            MultiServerMCPClient (customers-mcp + filesystem)
+```
 
 ## Resumo das Tecnologias
-Pendente...
+
+### Frameworks e Desenvolvimento Web
+- **Fastify** - Framework web rápido e de baixo overhead para Node.js
+- **TypeScript** - Linguagem tipada para desenvolvimento robusto
+- **Docker** - Containerização para infraestrutura (MongoDB, APIs)
+
+### IA e LLMs
+- **LangChain** - Framework para construção de aplicações com LLMs
+- **LangGraph** - Framework para construção de grafos de agentes com estado
+- **@langchain/openai** - Cliente para acesso a modelos via OpenRouter
+- **@langchain/mcp-adapters** - Adaptador para integração com servidores MCP
+- **OpenRouter** - Plataforma para acesso unificado a múltiplos modelos de IA
+- **Model Context Protocol (MCP)** - Protocolo para conexão de LLMs com ferramentas externas
+- **MultiServerMCPClient** - Gerenciamento de múltiplos servidores MCP
+
+### MCP SDK e Servidores
+- **@modelcontextprotocol/sdk** - SDK oficial para criação de servidores MCP
+- **MongoDB MCP Server** - Servidor MCP para operações em banco de dados MongoDB
+- **Filesystem MCP Server** - Servidor MCP para manipulação de arquivos
+- **MCP Inspector** - Ferramenta para testes interativos de servidores MCP
+
+### Bancos de Dados
+- **MongoDB** - Banco de dados NoSQL para persistência de dados
+- **Mongo-Express** - Interface web para administração do MongoDB
+
+### Validação e Tipagem
+- **Zod** - Validação de schemas TypeScript-first
+
+### Segurança e Autenticação
+- **JWT / Bearer Token** - Autenticação entre serviços (service-to-service)
+- **Node.js Crypto** - Módulo nativo para criptografia (AES-256-CBC, scrypt)
+
+### Ferramentas de Desenvolvimento e Testes
+- **GitHub Copilot** - Assistente de IA para desenvolvimento
+- **Copilot Agents** - Agentes especializados configuráveis via arquivos `.agent.md`
+- **Playwright** - Framework de testes end-to-end
+- **VS Code Copilot Chat** - Cliente MCP integrado ao editor
+
+### Gerenciamento de Pacotes e Distribuição
+- **npm** - Gerenciador de pacotes e distribuição
+- **Verdaccio** - Registry npm privado para testes de publicação
+- **tsx** - Executor TypeScript com suporte a shebang executável
+- **Skills CLI** (`npx skills`) - Gerenciador de pacotes de skills para Copilot
+
+### APIs e Integrações
+- **SerpAPI** - API para busca de dados do Google Trends
+- **Node.js Fetch API** - Cliente HTTP para comunicação com APIs REST
+
+### Arquitetura e Padrões
+- **Clean Architecture** - Padrão arquitetural com separação em Domain, Application e Infrastructure
+- **YAML/JSON** - Formatos de configuração para agents, skills e MCP servers
